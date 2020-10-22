@@ -1,0 +1,497 @@
+---
+title: "Introduction to Linear Regression Models in R"
+output:
+  html_document:
+    df_print: paged
+  word_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, 
+                      comment = NA)
+```
+## Getting and setting working directories
+```{r}
+pwd <- getwd()
+pwd
+```
+```{r}
+wd <- "C:/Users/mydam/OneDrive/Documents"
+setwd(wd)
+```
+
+## Loading packages
+```{r}
+library(ggplot2)
+```
+
+<!-- ## Install packages -->
+<!-- # ```{r} -->
+<!-- # install.packages("ggplot2") -->
+<!-- # install.packages("AER") -->
+<!-- # ``` -->
+
+## Getting help
+```{r, echo=FALSE}
+# function help
+?typeof
+
+# package help
+help(package=AER)       #brief description of the package and an index of functions and dataset included
+??AER
+```
+
+## Variable assignment
+```{r}
+n <- 3              #float (double)
+m <- as.integer(n)  #integer
+c <- 2i             #complex
+s <- "char"         #character(string)
+bool <- TRUE        #logical
+```
+
+## Types of variables
+```{r}
+typeof(n)
+typeof(m)
+typeof(c)
+typeof(s)
+typeof(bool)
+```
+
+## R as a calculator
+```{r}
+1+1
+1*pi
+a <- 3.5
+7/a
+abs(a-4)
+```
+
+
+## Data structures in R
+### Vectors 
+Vectors are one-dimensional arrays that contain the same type of data.
+```{r}
+x <- c(1, 2, 3, 4)                       #double
+w <- c(1:4)
+y <- c("cat", "dog")
+z <- c(TRUE, FALSE, FALSE)
+q <- c(2i, 3, 1.5, as.integer(4))        #complex
+```
+Strings manipulation
+```{r}
+nom <- "dam"
+prenom <- "my"
+# number of characters in a string
+nchar(nom)
+fullname <- paste(toupper(nom), toupper(prenom), sep=" ")
+nchar(fullname)
+```
+```{r}
+mystr <- "doraemon"
+substring(mystr, 2, 5)
+```
+Slicing vectors
+```{r}
+# First element
+x[1]
+# Last element
+x[length(x)]
+# All EXCEPT the 2nd element
+x[-2]
+# 2nd to 4th elements
+x[2:4]
+```
+
+### Matrices
+```{r}
+y <- matrix(1:6, nrow=3, ncol=2)
+y
+# Matrix dimension
+dim(y)
+# Total number of elements
+length(y)
+```
+Adding column and row names:
+```{r}
+cells <- c(1:6)
+rnames <- c("r1", "r2", "r3")
+cnames <- c("c1", "c2")
+mymat <- matrix(cells, nrow=3, ncol=2, byrow=TRUE, 
+                dimnames=list(rnames, cnames))
+mymat
+```
+Slicing a matrix:
+```{r}
+# (1,1) element
+mymat[1, 1]
+# Second column
+mymat[, 2]
+# Third row
+mymat[3, ]
+# Diagonal
+diag(mymat)
+```
+
+Matrices concatenation
+```{r}
+A <- matrix(1:20, nrow=4, ncol=5)
+B <- matrix(1:5, nrow=1, ncol=5)
+C <- rbind(A, B)
+C
+rbind(A, B, B)
+```
+### Arrays
+Arrays are similar to matrices but can have more than two dimensions (vectors and matrices are special cases of arrays)
+```{r}
+dim1 <- c("a1", "a2")
+dim2 <- c("b1", "b2", "b3")
+dim3 <- c("c1", "c2")
+myarray <- array(1:12, c(2, 3, 2), dimnames=list(dim1, dim2, dim3))
+myarray
+```
+### Dataframes
+Elements (cells) of a matrix must contain the same type of data. 
+Dataframes can contain different data types.
+Dataframes are created with the `data.frame()` function.
+```{r}
+c1 <- c(1:3)
+c2 <- c(4:6)
+c3 <- c("dog", "cat", "rabbit")
+df <- data.frame(c1, c2, c3)
+df
+class(df)
+dim(df)
+```
+Adding column names (variable names) and row index (first row)
+```{r}
+patientName <- c("Jones", "Mary", "Evans", "Anthony", "Joe")
+patientID <- c(1:5)
+age <- c(seq(25, 75, length.out = 5))
+Diabtype <- c("type 1", "type 2", "type 2", "type 2", "type 1")
+status <- c("Excellent", "Ok", "Improved", "Poor", "Poor")
+# df <- data.frame(patientID, age, Diabtype, status)
+df <- data.frame(patientName, age, Diabtype, status, 
+                 rownames=patientID
+                 )
+df
+```
+Inspecting the dataframes
+```{r}
+df$age
+```
+```{r}
+summary(df)
+```
+
+Slicing dataframes
+```{r}
+# First three columns
+df[1:3]
+# First three rows
+df[1:3, ]
+head(df, 3)
+```
+`attach`, `detach` and `with`
+Useful when names of the dataframes are long
+```{r}
+# load the built-in dataset 
+data(mtcars)
+```
+
+<!-- To see all built-in datasets -->
+<!-- ```{r} -->
+<!-- data() -->
+<!-- ``` -->
+
+Get the list of column names in `mtcars`
+```{r}
+colnames(mtcars)
+```
+
+Attach `mtcars` to avoid typing `mtcars$` to access its columns
+```{r}
+attach(mtcars)
+sumvar <- summary(cyl, mpg)
+detach(mtcars)
+```
+```{r}
+with(mtcars, {
+  print(summary(mpg, disp))
+  plot(mpg, disp)
+  plot(mpg, wt)
+})
+```
+
+## Logical operators 
+
+```{r}
+x <- c(1:5)
+x >= 3
+```
+```{r}
+# NOT
+!(x>3)
+# AND
+x>3 & x<5
+# OR
+x <= 2 | x >=4
+```
+`which` indices are TRUE?
+```{r}
+vars <- colnames(mtcars)
+vars
+which(vars == "mpg")
+```
+Logical indexing
+```{r}
+A <- matrix(1:10, nrow=2, ncol=5, byrow=TRUE)
+# A[A<=4]
+which(A <= 4)
+```
+
+## Generating pseudo random numbers and random samples
+### Sampling
+```{r}
+# Roll a dice once
+sample(1:6, 1)
+```
+```{r}
+# Roll a dice 4 times 
+sample(1:6, 4, replace=T)
+```
+Sampling from a vector with replacement
+```{r}
+result <- sample(c("Red", "Blue", "Yellow"), 100, replace=T)
+c1 <- result=="Blue"
+c2 <- result=="Yellow"
+# Number of blue or yellow balls
+sum(c1 | c2)
+```
+Some statistics
+```{r}
+mean(c1)
+```
+```{r}
+x <- sample(seq(from=1, to=100, by=2), 50, replace=T)
+var(x)
+sd(x)
+mean(x)
+median(x)
+```
+### Generating pseudo random numbers
+```{r}
+# from standard normal
+z <- rnorm(10000)
+hist(z)
+svg("histnorm.svg", width = 7, height = 7, pointsize = 12)
+dev.off()
+```
+```{r}
+# from uniform
+q <- runif(10000)
+hist(q)
+svg("histunif.svg", width = 7, height = 7, pointsize = 12)
+dev.off()
+```
+
+
+# TD 3 - Getting started with the linear model
+## Exercise 1
+```{r}
+size <- c(23, 19, 30, 22, 23, 29, 35, 36, 33, 25)
+grade <- c(430, 430, 333, 410, 390, 377, 325, 310, 328, 375)
+```
+### 1.1 Averages, Standard deviations, Correlation between `size` and `grade`:
+```{r}
+sprintf("The mean class size is %.3f", mean(size))
+sprintf("The mean average exam result is %.3f", mean(grade))
+```
+```{r}
+sprintf("Standard deviation of class size: %.3f", sd(size))
+sprintf("Standard deviation of average exam results: %.3f", sd(grade))
+```
+```{r}
+sprintf("The correlation between class size and average exam results: %.3f", cor(size, grade))
+```
+### 1.2 The linear model of interest
+$$ grade_i = \beta_0 + \beta_1 size_i + \epsilon_i, \quad i=1, \dots, 10. $$
+```{r}
+# Create a dataframe
+df = data.frame(grade, size)
+# Estimate the model
+fit <- lm(formula = grade ~ size)
+# Display the detailed results for the fitted model
+summary(fit)
+```
+```{r echo = FALSE}
+library(knitr)
+Function <- c("summary()", "coefficients()", 
+              "confint()", "fitted()", 
+              "residuals()", "anova()", 
+              "vcov()", "AIC()", 
+              "plot()", "abline()", 
+              "predict()"
+              )
+Action <- c("Display detailed results", "List parameter estimates", 
+            "Confidence intervals (95% by default)", "List predicted values", 
+            "Lists residual values", "ANOVA table for the fitted model or an ANOVA comparing two or more fitted models", 
+            "Covariance matrix for model parameters", "Akaike's Information Criterion", 
+            "Diagnostic plots for evaluating the fit", "Add a straight line to a plot", 
+            "Use the fitted model to predict response values for a new dataset")
+tab <- data.frame(Function/Operator, Action)
+kable(tab, caption="Common linear regression commands")
+```
+
+Plotting the data and the regression line
+```{r}
+plot(size, grade, 
+     xlab="Average class size", ylab="Exam result")
+abline(fit)
+svg("reg1.svg", width = 7, height = 7, pointsize = 12)
+dev.off()
+```
+
+Nicer plot via `ggplot2`
+```{r}
+# Generate predicted grade values
+df$pred <- predict(fit)
+# plot with ggplot
+library(ggplot2)
+ggplot(data = df, 
+       aes(x=size, y=grade)) + 
+  geom_point() + 
+  geom_line(aes(y=pred), 
+            color="red", 
+            alpha=0.5, 
+            size=2
+            ) +
+  labs(x="Class size", 
+       y="Exam result") + 
+  ggtitle("Regression model plot")
+svg("reg1gg.svg", width = 7, height = 7, pointsize = 12)
+dev.off()
+```
+Calculating $R^2$
+```{r}
+TSS <- sum((grade - mean(grade))^2)
+RSS <- sum(residuals(fit)^2)
+Rsq <- 1 - RSS/TSS
+Rsq
+# alternatively
+Rsq <- summary(fit)$r.squared
+Rsq
+```
+Generating 90% confidence intervals for each parameter
+```{r}
+CI90 <- confint(fit, level=0.9)
+CI90
+```
+
+```{r}
+sprintf("The 90 percent confidence interval for the intercept: (%.3f, %.3f)", CI90[1, 1], CI90[1, 2])
+sprintf("The 90 percent confidence interval for beta_1: (%.3f, %.3f)", CI90[2, 1], CI90[2, 2])
+```
+## Exercise 2
+```{r}
+# clear variables
+rm(list = ls())
+```
+Load the packages
+```{r, echo = FALSE}
+library(AER)
+```
+```{r}
+data("CPS1985")
+```
+### 2.1 Estimate the model
+$$ log(wage)_i = \beta_0 + \beta_1 female + u_i, \quad i=1,\dots, 534. $$
+Generate a dummy variable for woman:
+```{r}
+CPS1985$female <- (CPS1985$gender == "female")
+```
+
+Generate `log(wage)` variable
+```{r}
+CPS1985$lwage <- log(CPS1985$wage)
+```
+
+Estimation via OLS
+```{r}
+fit <- lm(data = CPS1985, lwage ~ gender)
+summary(fit)
+```
+
+### 2.2 Estimate the following model:
+$$
+\begin{align}
+log(wage)_i &= \alpha_0 + \alpha_1 female_i + \alpha_2 education_i + \alpha_3 experience + \alpha_4 experience^2 \\ 
+&+ \alpha_5 sectorConstruction + \alpha_6 sectorOther \\ 
+&+\alpha_7 technical + \alpha_8 services  + \alpha_9 office + \alpha_{10} sales + \alpha_{11} management + u_i, \\
+&i=1,\dots, 534.
+\end{align}
+$$
+Estimate the full model
+```{r}
+full <- lm(data = CPS1985, lwage ~ gender + education + experience + I(experience^2) 
+           + sector + occupation)
+summary(full)
+```
+```{r}
+f1 <- coefficients(fit)[2]
+f2 <- coefficients(full)[2]
+sprintf("The full model predicts a reduction of about %.3f percent in wage relative to men", f2*100)
+sprintf("The simple model predicts a reduction of about %.3f percent in wage relative to men", f1*100)
+```
+Both effects are significant at any significance level.
+
+### 2.3 Test the hypothesis that sector differences have no effect on salaries, mathematically
+$$ H_0: \alpha_5 = \alpha_6 = 0, \quad \quad H_1: \alpha_5 \neq 0 \text{ or } \alpha_6 \neq 0. $$
+Notice that the estimated coefficient on `construction` is not significant. We can use the $F$ test to test joint significance. Comparing the restricted and the full models can be done with the `anova()` function. The restricted model in this case is:
+$$
+\begin{align}
+log(wage)_i &= \alpha_0 + \alpha_1 female_i + \alpha_2 education_i + \alpha_3 experience + \alpha_4 experience^2 \\ 
+&+ \alpha_7 technical + \alpha_8 services  + \alpha_9 office + \alpha_{10} sales + \alpha_{11} management + u_i, \\
+&i=1,\dots, 534.
+\end{align}
+$$
+```{r}
+restricted <- lm(data = CPS1985, lwage ~ gender + education + experience + I(experience^2) 
+                 + occupation)
+summary(restricted)
+```
+
+Comparing the two models:
+
+```{r}
+anova(full, restricted)
+```
+
+We can verify:
+```{r}
+RSSu <- sum(residuals(full)^2)
+RSSr <- sum(residuals(restricted)^2)
+Fstat <- ((RSSr - RSSu)/2)/(RSSu/522)
+Fstat
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
