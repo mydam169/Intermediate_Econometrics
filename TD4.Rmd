@@ -1,0 +1,453 @@
+---
+title: "Tutorial Session 4: Panel Data"
+author: "Lecturer: G.Verdugo, TA: M.Dam"
+date: "31 octobre 2020"
+output:
+  word_document: default
+  html_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, 
+                      comment = NA)
+```
+
+## Exercise 1 
+
+
+$$
+\begin{equation}
+  y_{it} = x'_{it}\beta + \alpha_i + \epsilon_{it},\quad i=1,\dots, N;\: t=1, 2.
+\end{equation}
+$$
+where each $x_{it}$ is a $k\times 1$ column vector. 
+
+* The within model:
+
+$$
+ y_{it} - \bar{y}_i = (x'_{it} - \bar{x}'_i)\beta + \epsilon_{it} - \bar{\epsilon}_i,
+ \quad i=1,\dots, N; \: t=1,\dots, T.
+$$
+where $\bar{z}_i \equiv (1/T)\sum_{t=1}^Tz_{it}$, $z \in \{y, x, \epsilon\}$. The model in matrix form is:
+
+$$
+\begin{equation}
+\underbrace{\tilde{y}}_{NT\times 1} = 
+\underbrace{\tilde{X}}_{NT\times k}\underbrace{\beta}_{k\times1} + \underbrace{\tilde{\epsilon}}_{NT\times 1},
+\end{equation}
+$$
+where
+
+$$
+\begin{equation}
+\tilde{y} = \begin{pmatrix}
+y_{11} - \bar{y}_1 \\
+y_{12} - \bar{y}_1 \\
+\vdots \\
+y_{1T} - \bar{y}_1 \\
+\vdots \\
+y_{N1} - \bar{y}_N \\
+\vdots \\
+y_{NT} - \bar{y}_N \\
+\end{pmatrix},
+\quad 
+\tilde{X} = 
+\begin{pmatrix}
+x'_{11} - \bar{x}'_1 \\
+x'_{12} - \bar{x}'_1 \\
+\vdots \\
+x'_{1T} - \bar{x}'_1 \\
+\vdots \\
+x'_{N1} - \bar{x}'_N \\
+\vdots \\
+x'_{NT} - \bar{x}'_N
+\end{pmatrix}, 
+\quad
+\tilde{\epsilon} = \begin{pmatrix}
+\epsilon_{11} - \bar{\epsilon}_1 \\
+\epsilon_{12} - \bar{\epsilon}_1 \\
+\vdots \\
+\epsilon_{1T} - \bar{\epsilon}_1 \\
+\vdots \\
+\epsilon_{N1} - \bar{\epsilon}_N \\
+\vdots \\
+\epsilon_{NT} - \bar{\epsilon}_N \\
+\end{pmatrix}.
+\end{equation}
+$$
+
+The OLS estimator for $\beta$ in the within model is thus:
+$$
+\begin{align}
+\hat{\beta}_W &= (\tilde{X}'\tilde{X})^{-1}\tilde{X}'\tilde{y} \\
+&= \left(\sum_{i=1}^N \sum_{t=1}^T (x_{it}-\bar{x}_{i})(x'_{it}-\bar{x}'_{i})\right)^{-1}
+\sum_{i=1}^N \sum_{t=1}^T
+(x_{it}-\bar{x}_{i})(y_{it}-\bar{y}_{i}).
+\end{align}
+$$
+For $T=2$ it is easy to see that
+
+$$
+\begin{align}
+\sum_{t=1}^2 (x_{it}-\bar{x}_{i})(x'_{it}-\bar{x}'_{i}) 
+&= \frac{1}{2} (x_{i1} - x_{i2})(x'_{i1} - x'_{i2}), \\
+\sum_{t=1}^2 (x_{it}-\bar{x}_{i})(y_{it}-\bar{y}_{i}) 
+&=  \frac{1}{2} (x_{i1} - x_{i2})(y_{i1} - y_{i2}),
+\end{align}
+$$
+Hence in the two-period case
+$$
+ \hat{\beta}_W = \left(\sum_{i=1}^N (x_{i1} - x_{i2})(x'_{i1} - x'_{i2})\right)^{-1}
+ \sum_{i=1}^N (x_{i1} - x_{i2})(y_{i1} - y_{i2}).
+$$
+
+
+* Consider now the first-difference model:
+
+$$
+\begin{equation}
+ y_{it} - y_{it-1} = (x'_{it} - x'_{it-1})\beta + \epsilon_{it} - \epsilon_{it-1},
+ \quad i=1,\dots, N;\: t=2, \dots, T.
+ \end{equation}
+$$
+In matrix form:
+
+$$
+\begin{equation}
+\underbrace{y}_{N(T-1)\times 1} = 
+\underbrace{X}_{N(T-1)\times k}\beta + 
+\underbrace{\epsilon}_{N(T-1)\times 1},
+\end{equation}
+$$
+
+where
+
+$$
+\begin{equation}
+y = \begin{pmatrix}
+y_{12} - y_{11} \\
+\vdots \\
+y_{1T} - y_{1T-1} \\
+\vdots \\
+y_{N2} - y_{N1} \\
+\vdots \\
+y_{NT} - y_{NT-1} \\
+\end{pmatrix}, 
+\quad
+X = \begin{pmatrix}
+x'_{12} - x'_{11} \\
+\vdots \\
+x'_{1T} - x'_{1T-1} \\
+\vdots \\
+x'_{N2} - x'_{N1} \\
+\vdots \\
+x'_{NT} - x'_{NT-1} \\
+\end{pmatrix}, 
+\quad
+\epsilon = \begin{pmatrix}
+\epsilon_{12} - \epsilon_{11} \\
+\vdots \\
+\epsilon_{1T} - \epsilon_{1T-1} \\
+\vdots \\
+\epsilon_{N2} - \epsilon_{N1} \\
+\vdots \\
+\epsilon_{NT} - \epsilon_{NT-1} \\
+\end{pmatrix}.
+\end{equation}
+$$
+
+The OLS estimator for the FD model is thus:
+$$
+\begin{align}
+\hat{\beta}_F &= (X'X)^{-1}X'y \\
+&= \left(\sum_{i=1}^N \sum_{t=1}^T (x_{it}-x_{it-1})(x'_{it}-x'_{it-1})\right)^{-1}
+\sum_{i=1}^N \sum_{t=1}^T (x_{it}-x_{it-1})(y_{it}-y_{it-1}).
+\end{align}
+$$
+
+Hence for $T=2$, 
+
+$$
+\hat{\beta}_F = \left(\sum_{i=1}^N (x_{i2}-x_{i1})(x'_{i2}-x'_{i1})\right)^{-1}
+\sum_{i=1}^N (x_{i2}-x_{i1})(y_{i2}-y_{i1}),
+$$
+which is numerically equivalent to $\hat{\beta}_W$ derived above.
+
+## Exercise 2
+
+$$
+log(wage_{it}) = \theta_1 + \theta_2d2_t + Z_{it}\gamma + \delta_1 female_i + \delta_2 (d2_t\times female_i) + \alpha_i + \epsilon_{it} 
+$$
+
+1. The differenced equation:
+
+$$
+\begin{align}
+  log(wage_{i2})-log(wage_{i1}) &= \theta_2 + (Z_{i2}-Z_{i1})\gamma + \delta)2 female_i + \epsilon_{i2}-\epsilon_{i1} \\
+  \Delta log(wage_i) &= \theta + \Delta Z_i \gamma + \delta_2 female_i + \Delta \epsilon_i.
+\end{align}
+$$
+
+Hence $\theta_2, \gamma$ and $\delta_2$ can be consistently estimated (assuming that there is no time-invariant regressors in $Z$).
+
+2. Taking expectation of the differenced equation using the zero conditional mean assumption to get:
+
+$$
+\begin{equation}
+ \mathbb{E}[\Delta log(wage_i)\:|\:female_i=0,\: \Delta Z_i=0] = \theta_2.
+\end{equation}
+$$
+Hence $\theta_2$ represents the expected (average) log wage change (wage rate growth) for non-female workers from the first to the second period.
+
+To interpret $\delta_2$, note that:
+
+$$
+\begin{equation}
+ \mathbb{E}[\Delta log(wage_i)\:|\:female_i=1,\: \Delta Z_i=0] = \theta_2 + \delta_2.
+\end{equation}
+$$
+Hence $\delta_2$ represents the expected (average) difference in wage rate change between men and women from the first to the second period.
+
+## Exercise 3
+
+For this exercise, we use the dataset `Fatalities` from the `AER` package. 
+
+### 1. Load the data, check their dimension. Is the panel balanced ? Define the fatality rate per 10 000 inhabitants.
+
+Data loading
+
+```{r}
+library("AER")
+data("Fatalities")
+dim.data.frame(Fatalities)
+```
+The data frame has 336 observations and 34 variables. 
+Data description documentation:
+```{r}
+help("Fatalities")
+```
+<!-- Descriptive statistics: -->
+<!-- ```{r} -->
+<!-- summary(Fatalities) -->
+<!-- ``` -->
+Variable names:
+```{r}
+colnames(Fatalities)
+```
+
+To see if the panel is balanced:
+```{r}
+table(Fatalities$year)
+table(Fatalities$state)
+```
+```{r}
+tab <- table(Fatalities$year, Fatalities$state)
+# Check if there is an observation for each year in each state
+all(tab == 1)
+```
+If `all(tab==1)` gives `TRUE` then the panel is balanced.
+
+Create a variable for fatality rate per 10000 inhabitants, call it `frate`:
+```{r}
+Fatalities$frate <- (Fatalities$fatal/Fatalities$pop)*10000
+```
+
+
+### 2. Estimate two cross-sectional simple linear regressions explaining the fatality rate by the level of the beer tax using alternatively the years 1982 and 1988. Use a robust variance estimator to estimate the standard errors. Plot the data with the regression lines for these two years.
+
+Creating subsets of data (to save typing effort)
+```{r}
+df82 <- subset(Fatalities, year == 1982)
+df88 <- subset(Fatalities, year == 1988)
+```
+
+Simple regressions explaining fatality rate by beer taxes in 1982 and 1988:
+```{r}
+sm82 <- lm(data = df82, frate ~ beertax)
+sm88 <- lm(data = df88, frate ~ beertax)
+```
+
+We can use the `stargazer` library to print out regression results of different models side by side:
+
+```{r}
+#install.packages("stargazer")
+library(stargazer)
+stargazer(sm82, sm88, type = "text")
+```
+
+Higher beer tax increases fatality rates? Probably due to omitted variable biases...
+
+
+Robust standard errors (to correct for potential heteroskedasticity) using `coeftest`:
+
+```{r}
+coeftest(sm82, vcov. = vcovHC, type = "HC1")
+```
+
+```{r}
+coeftest(sm88, vcov. = vcovHC, type = "HC1")
+```
+
+
+Plotting the data with regression lines:
+
+```{r}
+# scatter plot of 1982 data
+plot(x = df82$beertax, 
+     y = df82$frate, 
+     xlab = "Beer tax in 1982 in USD", 
+     ylab = "Fatalities per 10000 inhabitants", 
+     main = "Traffic fatality rates and beer taxes in 1982", 
+     ylim = c(0, 4.5),
+     pch = 20,
+     col = "steelblue"
+)
+# regression line
+abline(sm82, lwd = 2)
+```
+
+
+```{r}
+# pdf("sm88.pdf", width = 5, height = 5, pointsize = 12)
+# scatter plot of 1988 data
+plot(x = df88$beertax, 
+     y = df88$frate, 
+     xlab = "Beer tax in 1988 in USD", 
+     ylab = "Fatalities per 10000 inhabitants", 
+     main = "Traffic fatality rates and beer taxes in 1988", 
+     ylim = c(0, 4.5),
+     pch = 20,
+     col = "steelblue"
+)
+#regression line
+abline(sm88, lwd = 2)
+# dev.off()
+```
+ 
+
+### 3. Estimate the same model in first-differences using only the 1982 and 1988 years and robust standard errors. Plot the data with the regression line. Are the results similar to the cross-sectional results?
+
+Compute first differences in fatality rate and beer tax:
+```{r}
+dif_frate <- df88$frate - df82$frate
+dif_tax <- df88$beertax - df82$beertax
+```
+
+Simple regression using differenced data
+```{r}
+smdiff <- lm(dif_frate ~ dif_tax)
+summary(smdiff)
+```
+
+Heteroscedasticity-consistent standard errors:
+```{r}
+coeftest(smdiff, vcov = vcovHC, type = "HC1")
+```
+
+
+Note that the model includes an intercept that captures time fixed effects.
+In contrast to the models in the previous part, our estimated effect of the beer tax is now __negative__. We have probably corrected some omitted variable biases.
+
+Plotting of the differenced data and regression result
+```{r}
+# pdf("smdiff.pdf", width = 5, height = 5, pointsize = 12)
+plot(x = dif_tax, 
+     y = dif_frate, 
+     xlab = "Change in beer taxes 1982-1988", 
+     ylab = "Change in fatalities rate 1982-1988",
+     xlim = c(-0.6, 0.6), 
+     ylim = c(-1.5, 1), 
+     pch = 20, 
+     col = "steelblue"
+     )
+abline(smdiff, lwd = 2)
+# dev.off()
+```
+
+
+
+### 4. Now, we aim to estimate the same model on annual data including time and year fixed effects. Estimate the model with manually demeaned data and then with the within estimator from the `plm` package. Test the null hypothesis that all coefficients of year fixed effect are zero.
+
+* Estimate the same model on annual data including time and year fixed effects:
+
+```{r}
+fe_lm <- lm(data = Fatalities, 
+            frate ~ beertax + year + state - 1)
+# Note that -1 removes the intercept
+# summary(fe_lm)
+```
+
+<!-- If we don't remove the intercept, then the intercept is the estimated of one dropped out group (which is the time effect of year 1982 in this case) -->
+<!-- ```{r} -->
+<!-- fe_lm2 <- lm(data = Fatalities,  -->
+<!--             frate ~ beertax + year + state) -->
+<!-- ``` -->
+
+* Obtain the demeaned data using `ave()` to take group averages
+
+<!-- ``{r} -->
+<!-- help("ave") -->
+<!-- ``` -->
+
+<!--```{r} -->
+<!--length(unique(ave(Fatalities$frate, Fatalities$state))) -->
+<!--``` -->
+
+
+```{r}
+df_demeaned <- with(Fatalities, 
+                    data.frame(frate = frate - ave(frate, state), 
+                               beertax = beertax - ave(beertax, state), 
+                               year = year))
+```
+Estimate  with the demeaned dataset
+
+```{r}
+summary(lm(data = df_demeaned, 
+           frate ~ beertax + year - 1))
+```
+
+* Within estimator with the `plm` package
+
+Install and load the package (might need to update and restart R)
+
+<!-- ```{r} -->
+<!-- install.packages("plm") -->
+<!-- ``` -->
+
+
+```{r}
+library(plm)
+```
+
+Estimate the FE regression model with `plm()`
+```{r}
+fe_plm <- plm(data = Fatalities, 
+              frate ~ beertax + year, 
+              index = c("state", "year"), # i and t indices
+              model = "within"
+              )
+```
+
+Print summary using robust standard errors
+
+```{r}
+coeftest(fe_plm, vcov. = vcovHC, type = "HC1")
+```
+
+* Test the null hypothesis that the coeff of year fixed effects are zero
+
+```{r}
+linearHypothesis(fe_plm, 
+                 test = "F", 
+                 c("year1983=0","year1984=0","year1985=0",
+                   "year1986=0","year1987=0","year1988=0"), 
+                 vcov. = vcovHC, type = "HC1")
+```
+
+Hence we reject $H_0$ at any level of significance.
+
+
+
+
